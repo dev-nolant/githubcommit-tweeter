@@ -8,22 +8,23 @@ from timeout import timeout
 
 funny_words = open("swear_words.txt", "r").readlines()
 
-ACCESS_TOKEN = 'abc'#change
+ACCESS_TOKEN = 'abc'
 
 g = Github(ACCESS_TOKEN)
 
 TIMEOUT_ = 240
 
-consumer_key = 'abc'#change
-secret = 'abc'#change
-token = 'abc'#change
-token_secret = 'abc'#change
+consumer_key = 'abc'
+secret = 'abc'
+token = 'abc'
+token_secret = 'abc'
 
 auth = tweepy.OAuthHandler(consumer_key, secret)
 auth.set_access_token(token, token_secret)
 
 api = tweepy.API(auth)
 tweets = []
+
 for tweet in tweepy.Cursor(api.user_timeline).items():
     tweets.append(tweet.text)
 
@@ -64,6 +65,22 @@ Returns:
 
 @timeout(TIMEOUT_)
 def search_github(keyword):
+    rate_limit = g.get_rate_limit()
+    rate = rate_limit.search
+    if rate.remaining == 0:
+        print(f'You have 0/{rate.limit} API calls remaining. Reset time: {rate.reset}')
+        time = (time.split(" "))[1]
+        from datetime import datetime
+        now = datetime.now()
+        string=('%02d:%02d:%d'%(now.hour,now.minute,now.second))
+
+        time_1 = datetime.strptime(string,"%H:%M:%S")
+        time_2 = datetime.strptime(time,"%H:%M:%S")
+        time_difference = time_2 - time_1
+        #send_tweet(f"All out of API calls today! I will be reset at: {time_difference}")
+        return
+    else:
+        print(f'You have {rate.remaining}/{rate.limit} API calls remaining')
     query = f'"merge: {keyword}'
     results = g.search_commits(query, sort="committer-date", order='desc')
     count = results.totalCount
