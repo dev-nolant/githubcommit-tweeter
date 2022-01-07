@@ -14,13 +14,15 @@ g = Github(ACCESS_TOKEN)
 
 TIMEOUT_ = 240
 
+
 def random_number(count):
     number = random.randint(1, count)
     return number
 
+
 def remove_word(word):
     # Read in the file
-    with open('swear_words.txt', 'r') as file :
+    with open('swear_words.txt', 'r') as file:
         filedata = file.read()
 
     # Replace the target string
@@ -32,18 +34,21 @@ def remove_word(word):
         file.close()
     print(f"Removed word: {word}")
 
+
 # Active timeout. Can be changed with var above
 """[Search GitHub with funny/profanity word]
 Search all of GitHub commits for the word, and then parse the commit comments.
 Returns:
     [string]: [body of the commit chosen]
 """
+
+
 @timeout(TIMEOUT_)
 def search_github(keyword):
     query = f'"merge: {keyword}'
     results = g.search_commits(query, sort="committer-date", order='desc')
     count = results.totalCount
-    
+
     if count < 500:
         remove_word(keyword)
         raise Exception('manual fail: search keyword not meeting query')
@@ -61,7 +66,7 @@ def search_github(keyword):
             already_used = open("already_used.txt", "r")
             parsed = (already_used.read()).split('!~')
             if "Successfully deployed" not in comment_content and ".js*" not in comment_content \
-                and comment_content not in parsed and len(comment_content) <= 280:
+                    and comment_content not in parsed and len(comment_content) <= 280:
                 if (len(comment_content) > 30):
                     if (keyword not in comment_content):
                         pass
@@ -72,11 +77,14 @@ def search_github(keyword):
                 already_used2.close()
                 return filtered
 
+
 """[Start and End of function parsing]
 Will start the program, and then if it runs into an error, it will automatically wait 30 secs and restart.
 
 If found correct word, it parses as needed, and executes whatever command you want it to with that string.
 """
+
+
 def begin():
     try:
         word_used = random.choice(funny_words)
@@ -96,7 +104,7 @@ def begin():
             os.system("python launch.py")
         if "object is not subscriptable" in str(e):
             remove_word(word_used)
-            
+
         print(f"Failed. Waiting 30 secs to restart. ERROR: {str(e)}")
         time.sleep(30)
         print("Restarting...")
