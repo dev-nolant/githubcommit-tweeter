@@ -1,18 +1,37 @@
 import os
 import random
 import time
-
+import tweepy
 from github import Github
 
 from timeout import timeout
 
 funny_words = open("swear_words.txt", "r").readlines()
 
-ACCESS_TOKEN = 'abc'
+ACCESS_TOKEN = 'abc'#change
 
 g = Github(ACCESS_TOKEN)
 
 TIMEOUT_ = 240
+
+consumer_key = 'abc'#change
+secret = 'abc'#change
+token = 'abc'#change
+token_secret = 'abc'#change
+
+auth = tweepy.OAuthHandler(consumer_key, secret)
+auth.set_access_token(token, token_secret)
+
+api = tweepy.API(auth)
+tweets = []
+for tweet in tweepy.Cursor(api.user_timeline).items():
+    tweets.append(tweet.text)
+
+
+def send_tweet(quote: str):
+
+    api.update_status(str(quote))
+    return 1
 
 
 def random_number(count):
@@ -63,18 +82,12 @@ def search_github(keyword):
         for comment in result.get_comments():
             comment_content = comment.body
             print(f"COMMENT CHECKED: [{comment_content}]\n-------------")
-            already_used = open("already_used.txt", "r")
-            parsed = (already_used.read()).split('!~')
             if "Successfully deployed" not in comment_content and ".js*" not in comment_content \
-                    and comment_content not in parsed and len(comment_content) <= 280:
+                    and comment_content not in tweets and len(comment_content) <= 280:
                 if (len(comment_content) > 30):
                     if (keyword not in comment_content):
                         pass
                 filtered.append(comment_content)
-                already_used.close()
-                already_used2 = open("already_used.txt", "a")
-                already_used2.write("!~"+comment_content)
-                already_used2.close()
                 return filtered
 
 
@@ -91,7 +104,6 @@ def begin():
         print(f"Using word: {word_used}")
         results = search_github(word_used)
         return results[0]
-        exit(1)
 
     except Exception as e:
         if "second" in str(e):
@@ -99,9 +111,11 @@ def begin():
             time.sleep(60)
             print("Restarting...")
             os.system("python launch.py")
+
         if "search keyword not meeting query" in str(e):
             print("Restarting...")
             os.system("python launch.py")
+
         if "object is not subscriptable" in str(e):
             remove_word(word_used)
 
