@@ -1,11 +1,21 @@
 import github_find
 import time
 import tweet_send
-i = 1
-while i:
+import os
+
+def restart():
+    print("Restarting...")
+    os.system("python launch.py")
+    quit()
+
+while 1:
     tweet = github_find.begin()
     print(tweet, " : sent")
 
-    print("Complete. Waiting 1 hour before next post.")
-    tweet_send.send_tweet(tweet)
-    time.sleep(3600)
+    response = tweet_send.send_tweet(tweet)
+    if response == 1:
+        print("Complete. Waiting 1 hour before next post.")
+        time.sleep(3600)
+        restart()
+    else:
+        restart()
